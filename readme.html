@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<!--
+   readme.html
+   
+   Copyright 2022 dev <jimduba@duba.org>
+
+   If you use this program or pieces of it or if you find anything wrong
+   with it, please, let me know at the above email address.
+   
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
+   
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+   
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+   MA 02110-1301, USA.
+   
+-->
+
+<head>
+<meta charset="utf-8" />
+<title>The Dots Game</title>
+<meta name="generator" content="Geany 1.36" />
+</head>
+
+<body>
+<h1>Current Work and Notes</h1>
+<h2>Status</h2>
+<p>
+It can actually play a game now. Kind of primitive. Now it's time for refinements.
+</p>
+<h2>Things to do/fix</h2>
+<p>
+The game is done. if someone wants to play with the game or the code, that's fine.
+</p>
+
+<h1>Dots Overview</h1>
+<p>
+Dots is a kids game that we used to play incessantly. I was watching an adult teach some kids to play the game and thought I could write a program to do that in python (since I just got through a python course). I thought that it would be an easy and fun project and give me an opportunity to internalize more of python as well as explore Pygame a bit. I was very wrong. Keeping track of line segments and squares became quite a challenge. I didn't keep track, but I'll bet I have more than 40 hours involved in this. And it's doesn't involve pygame all that much.
+</p>
+
+<p>
+Dots is played by 2 players on a square grid of dots of arbitrary size. The players alternate turns connecting dots with horozontal and vertical lines. Whenever a player completes a square, it's owned by that player and the player must connect 2 more dots. When the grid is filled, the player who has completed the most squares is the winner. For a turn, a player must connect 2 dots (if there are no dots to connect the game ends).
+</p>
+
+<h1>How the Game Works</h1>
+
+<h2>Collecting Data</h2>
+<ul>
+<li>player names to associate with colors</li>
+<li>grid size (could change shape?) for now a square</li>
+<li>do i want a play again feature?</li>
+</ul>
+
+<h2>initial display</h2>
+<p>
+The grid is an array of dots. Status like player turn and score is kept in the terminal window where the game was started.
+</p>
+<h2>Game Play</h2>
+<p>
+Each player is a color red or green. The current player (indicated by color of the dots) must click between the dots and a segment will appear. Then the other player can have a go. Whenever a square is completed, the square is filled with the players color. Then that player MUST select another segment, which if it completes a square means another turn for that player. If a line completes 2 squares, they both belong to that player and that plalyer must still click another line.
+</p>
+
+<h2>The ending</h2>
+<p>
+When all the squares are filled in, the game stops and the player with the most filled in squares wins.
+</p>
+
+<h1>The Programming</h1>
+<p>
+I'm writing and testing this on Ubuntu Linux. If I get access to a windows computer, I'll test it there, but making no promises. I'll put a working version out on github (https://github.com/jimdym/dots) where it can be accessed.
+</p>
+
+<ul>
+<li>collect info from user. first is red, second is green</li>
+<li>display board</li>
+<li>Get move from the next player</li>
+<li>find the segment or not</li>
+<li>find if the segment completes a square</li>
+<li>automatically fill completed square with player color</li>
+<li>detect no more possible squares</li>
+<li>display final results</li>
+</ul>
+
+<p>
+Requires pygame be installed
+</p>
+
+<h2>Classes</h2>
+
+<p>
+There are three classes: dots, segments, and squares. This just seemed like a logical way to do it.
+</p>
+
+<h3>Dot</h3>
+<p>
+A dot is a point (x,y) not a tuple although that's probably a better way to impliment it. Radius (for when it's drawn) is hard coded for now at 5. It gets a color (that of the current player) when it's draw method is called.
+</p>
+
+<h4>draw method</h4>
+<p>
+at x,y draw a circle specified by a color
+</p>
+
+<h4>__eq__</h4>
+<p>
+This is a user written method to determine if 2 members of a class are equal. In the case of a Dot the method returns True of the x's and the y's are equal. SO if x1==x2 and y1==y2. Dots that are equal don't make any sense. 
+</p>
+
+<h3>Seg</h3>
+<p>
+Line segments. A line segment is 2 dots: dot1, dot2. They can only be vertical or horizontal There is a draw method that draws a line between them. So here's a thing: we need to orient the dots correctly: if the Seg is vertical (y1==y2), the dot with the smallest x is first. if the Seg is horozontal (x1==x2) the dot with the smallest y is first. This will make it much easier to define squares.
+</p>
+
+<h4>draw method</h4>
+<p>
+draw a line segment between dot1 and dot2 using the current player color and the SEG_WIDTH variable.
+</p>
+
+<h4>__eq__</h4>
+<p>
+2 Segs are equal if their dots are equal. This is going to cause a problem with squares so the dots need to be stored in the correct order.
+</p>
+
+<h4>__str__</h4>
+<p>
+This is here just so we can print a segment. Pretty handy when troubleshooting but not necessary and not called during production execution.
+</p>
+
+<h4>isVert method</h4>
+<p>
+A segment is vertical or horozontal. If the xs are ==, return True else False. This says nothing about if they're attached or colinear.
+</p>
+
+<h4>isHoriz</h4>
+<p>
+Like isVert. It's a bit easier (for me) to think in terms of true in an if statement rather than !isVert.
+</p>
+
+<h4>isHLess</h4>
+<p>
+I started to make less than and greater than methods and didn't like the complexity. I'll probably do another implementation that way. Anyway, for 2 horizontal segments, this returns True if self is closer to the top than other.
+</p>
+
+<h4>isVLess</h4>
+<p>
+For 2 vertical segments is True when self is to the left of other
+</p>
+
+<h4>adjacent</h4>
+<p>
+Returns True when self and other have a dot in common.
+</p>
+
+<h4>para</h4>
+<p>
+Gets at the idea of parallel, but the segments must be within 1 (DOT_DIST) unit of each other. I thought about abstracting the game from what pygame needs, but don't bother in this implementation. Might be worth doing later.
+</p>
+
+<h4>coLinear</h4>
+<p>
+Two segments can't be part of the same square if they're colinear.
+</p>
+
+<h3>Square</h3>
+<p>
+When a square is completed, it will be colored with the color of the player completing the square. A square is 4 dots and the color of the player completing it. going to use these colors to count up at the end.
+</p>
+
+<h4>draw</h4>
+<p>
+The dot at the top left corner of the square and the player color that created the square. 
+</p>
+<h4>__eq__</h4>
+<p>
+Not sure I'll need this, but the segments will need to be equal.
+</p>
+
+<h2>Functions Not Included in Classes</h2>
+
+<h3>idSeg</h3>
+<p>
+	idSeg will take the coordinates of the mouse click and find the dots corresponding to the correct segment, then add them to the list of segments. Returns True of a valid segment. Returns False and rings the bell if click is on a sebment already in use or out of bounds
+</p>
+
+<h3>findSquares</h3>
+<p>
+looks through the list of existing segments to find a candidate list that the most recent segment could be in a square with. Function will return 0,1, or2 to indicate how many squares were found.
+</p>
+
+<h3>isSquare</h3>
+<p>
+Takes a list of 4 segments and figures out if they form a square
+</p>
+<h3>Main Loop</h3>
+<p>
+Variables for this iteration of the game like scores, segments, and squares.Call the draw function of squares, segments, and dots (in that order). Print the score somewhere by counting the squares of each color. Determine the end of the game
+</p>
+
+<h3>Get Move</h3>
+<p>
+follow the cursor and get the mouse click. is it already, selected? change color? can the user undo selecction while still in turn?
+</p>
+
+<h2>What I need to explore</h2>
+<li>pygame mouse click and change to finger</li>
+
+<h1>Test Programs</h1>
+<p>
+When I can't figure outhow to do something quickly, I'll extract the necessary elements from the main code to noodle it around. This way I don't mess up the main code to figure something out.
+</p>
+
+<h2>tProcClist.py</h2>
+<p>
+This seesm idiotic now, but I couldn't see how to process the list of collected segments to figure out how many squares they might represent.
+</p>
+
+<h1>References/Credits</h1>
+<p>
+I learned python from a udemy course and a Head First book. I'm a frequent googler (although these days I use duckduckgo mostly). I found videos on the <a href=https://www.youtube.com/c/TechWithTim>Tech With Tim</a>, and <a href=https://www.youtube.com/c/TokyoEdTech>Tokyo Ed Tech</a> you tube channels to get a bit of how pygame works.
+</p>
+
+</body>
+
+</html>
